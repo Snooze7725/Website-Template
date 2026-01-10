@@ -1,4 +1,0 @@
--Add css to the html
--Make the index control which page is shown instead of having the attribute onclick go to the file directly
--Learn how to integrate ajax/fetch
--Check for improvements
