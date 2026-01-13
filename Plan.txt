@@ -1,0 +1,5 @@
+-HTTP req is submitted
+-Routing table finds controller and returns a list of info
+-If page, which is within the list, is "return", then set page as the last page
+using session data
+-Elif page is not null, set page as the default
