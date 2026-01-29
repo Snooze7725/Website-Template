@@ -1,0 +1,9 @@
+# PHP + MySQL web app dependencies
+php:
+  version: ">=8.3.1"
+
+database:
+  type: mysql
+  version: ">=5.7.24"
+  tables:
+    - users:

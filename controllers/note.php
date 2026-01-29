@@ -1,6 +1,13 @@
 <?php
+namespace Core\Controllers;
+
+// TODO Debug note.php
 class NoteController {
-    public function storeNote(mysqli $mysqli): void {
+    // function static function identify(): string {
+    //     return 
+    // }
+
+    public static function addNote(\mysqli $mysqli): void {
         // "trim()" - removes leading and trailing whitespace
         $title = trim($_POST['title'] ?? '');
         $content = trim($_POST['content'] ?? '');
@@ -8,15 +15,15 @@ class NoteController {
 
         $stmt = $mysqli->prepare("INSERT INTO notes (title, content, publish_date) VALUES (?, ?, ?)");
         if (!$stmt) {
-            die("Prepare failed: " . $mysqli->error);
+            return;
         }
         $stmt->bind_param("sss", $title, $content, $date);
 
-        if (!$stmt->execute()) {
-            die("Execute failed: " . $stmt->error);
-        }
-        // Technically not needed but good practice
+        $stmt->execute();
+        
         $stmt->close();
+
+        require_once realpath(__DIR__ . '/../views/pages/home.php');
     }
 
     /**
@@ -25,7 +32,7 @@ class NoteController {
      * @param mysqli $mysqli The mysqli connection obj.
      * @return array $notes A bunch of notes from the database.
      */
-    public function showNotes(mysqli $mysqli): array {
+    public static function getNotes(\mysqli $mysqli): array {
         // Fetch all notes first
         $notes = [];
         // "DESC" - makes the order reversed
@@ -44,14 +51,23 @@ class NoteController {
                 'publish_date' => $note['publish_date']
             ];
         }
+
         if (!$notes) {
-            die("Fetch failed: " . $mysqli->error);
+            $logtype = "ERROR";
+            $layer = "CONTROLLER";
+            $httpReq = 
+            $context = "Notes were not fetchable from the database";
+            // TODO add the error into the log
+            $info = static::class; 
+            $logicLog =  "[" . date('Y-m-d H:i:s') . "] [" . $logtype . "]" . "[" . $layer . "]" . $context . "|" . $logData . "\n";
+            file_put_contents(__DIR__ .'/logs/req.log', $logicLog, FILE_APPEND);
+            return [];
         }
 
         return $notes;
     }
 
-    public function deleteNote(mysqli $mysqli, int $id): void {
+    public static function deleteNote(\mysqli $mysqli, int $id): void {
         $stmt = $mysqli->prepare("DELETE FROM notes WHERE ID = ?");
         if (!$stmt) {
             die("Query failed: " . $mysqli->error);
@@ -63,7 +79,7 @@ class NoteController {
         }
     }
 
-    public function clearNotes(mysqli $mysqli): void {
+    public static function clearNotes(\mysqli $mysqli): void {
         $stmt = $mysqli->prepare("DELETE FROM notes");
         if (!$stmt) {
             die("Query failed: " . $mysqli->error);
