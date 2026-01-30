@@ -2,15 +2,18 @@
 use Core\Router as Router;
 use Core\Database as Database;
 use Core\Helper as Helper;
+use Core\ControllerPath as ControllerPath;
+use Core\Logs as Logs;
 
-// Now data in the session global var is available
-session_start(); // Gets data from the session
+// Now availabParams in the session global var is available
+session_start(); // Gets availabParams from the session
 
 
 // php -S localhost:8000
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/router.php';
 require_once __DIR__ . '/helper.php';
+require_once __DIR__ . '/controller_path.php';
 
 $db = new Database();
 
@@ -19,22 +22,17 @@ $method = $_SERVER['REQUEST_METHOD'] ?? '';
 $uri = $_SERVER['REQUEST_URI'] ?? '';
 
 // Logs requests
-$reqLog =  "[" . date('Y-m-d H:i:s') . "]" . " INFO: " . $method . " " . $uri . "\n";
-file_put_contents(__DIR__ .'/logs/req.log', $reqLog, FILE_APPEND);
+Logs::httpReqLog("INFO", $method, $uri);
 
 // Gets the controller and method
 [$classRef, $classMethod] = Router::routeController($method, $uri);
 
-$classPaths = [
-    "Helper" => __DIR__ . "/controllers/controller_helper.php",
-    "NoteController" => __DIR__ . "/controllers/note.php",
-];
-require_once $classPaths[$classRef];
-$classRef = "Core\\Controllers\\" . $classRef; // Add the namespace
-$class = new $classRef();
+require_once ControllerPath::filePath($classRef);
+$classRefNamespace = ControllerPath::controllerNamespace($classRef);
+$class = new $classRefNamespace();
 
 // All available params to outside fns
-$data = [
+$availabParams = [
     "uri" => $uri,
     "_GET" => $_GET,
     "_POST" => $_POST,
@@ -42,9 +40,9 @@ $data = [
     "mysqli" => $db->mysqli,
 ];
 
-$params = Helper::getFnParams($class, $classMethod, $data);
+$params = Helper::getFnParams($class, $classMethod, $availabParams);
 
-if (Helper::isStaticMethod($classRef, $classMethod)) {
+if (Helper::isStaticMethod($classRefNamespace, $classMethod)) {
     $class::$classMethod(...($params));
 } else $class->$classMethod(...($params));
 ?>

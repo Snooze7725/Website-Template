@@ -9,7 +9,7 @@
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($notes as $note): ?>
+        <?php foreach ($data as $note): ?>
         <tr>
             <td><?= $note['ID'] ?></td>
             <td><?= $note['title'] ?></td>

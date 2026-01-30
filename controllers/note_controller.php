@@ -1,13 +1,18 @@
 <?php
 namespace Core\Controllers;
 
-// TODO Debug note.php
-class NoteController {
+use Core\ControllerPath as ControllerPath;
+use Core\Controllers\BaseController as BaseController;
+
+require_once realpath(__DIR__ . "/../controller_path.php");
+require_once ControllerPath::filePath("BaseController");
+
+class NoteController extends BaseController {
     // function static function identify(): string {
     //     return 
     // }
 
-    public static function addNote(\mysqli $mysqli): void {
+    public static function addNote(\mysqli $mysqli, string $uri): void {
         // "trim()" - removes leading and trailing whitespace
         $title = trim($_POST['title'] ?? '');
         $content = trim($_POST['content'] ?? '');
@@ -18,12 +23,20 @@ class NoteController {
             return;
         }
         $stmt->bind_param("sss", $title, $content, $date);
-
         $stmt->execute();
-        
         $stmt->close();
 
-        require_once realpath(__DIR__ . '/../views/pages/home.php');
+        $uriNarrow = [];
+        $keys = [["/user/signup", "/user/login"], ["/note/send"], ["/note/delete"]];
+        $values = ["/", "/send_note", "delete_note"];
+        for ($i = 0; $i < count($values); $i++) {
+            $uriNarrow[$keys[$i]] = $values[$i];
+        }
+        
+        var_dump($uriNarrow);
+        exit();
+
+        self::showPage($mysqli, $uri);
     }
 
     /**
@@ -53,14 +66,6 @@ class NoteController {
         }
 
         if (!$notes) {
-            $logtype = "ERROR";
-            $layer = "CONTROLLER";
-            $httpReq = 
-            $context = "Notes were not fetchable from the database";
-            // TODO add the error into the log
-            $info = static::class; 
-            $logicLog =  "[" . date('Y-m-d H:i:s') . "] [" . $logtype . "]" . "[" . $layer . "]" . $context . "|" . $logData . "\n";
-            file_put_contents(__DIR__ .'/logs/req.log', $logicLog, FILE_APPEND);
             return [];
         }
 

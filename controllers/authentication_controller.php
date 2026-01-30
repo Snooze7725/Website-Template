@@ -1,7 +1,13 @@
 <?php
 namespace Core\Controllers;
 
-class AuthenticationController {
+use Core\ControllerPath as ControllerPath;
+use Core\Controllers\BaseController as BaseController;
+
+require_once realpath(__DIR__ . "/../controller_path.php");
+require_once ControllerPath::filePath("BaseController");
+
+class AuthenticationController extends BaseController {
     /**
      * Just checks if a username is available.
      *

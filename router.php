@@ -1,13 +1,17 @@
 <?php
 namespace Core;
 
+use Core\Logs as Logs;
+
+require_once __DIR__ . '/logs.php';
+
 class Router {
     private static $staticRouter = [
         "GET" => [
-            "home" => ["/" => ["Helper", "showPage"]],
+            "home" => ["/a" => ["BaseController", "showPage"]],
             "note" => [
-                "/delete_note" => ["Helper", "showPage"],
-                "/send_note" => ["Helper", "showPage"]
+                "/delete_note" => ["BaseController", "showPage"],
+                "/send_note" => ["BaseController", "showPage"]
             ],
             "userAuth" => ["/login-signup" => ["GeneralController", "showLoginSignup"]]
         ],
@@ -41,7 +45,8 @@ class Router {
 
         // No match
         http_response_code(404);
-        echo "404 Not Found (routeController): " . $method . " " . $uri; // DANGEROUS
+        // DEB-LOG
+        Logs::debugLog("ERROR", __CLASS__, __FUNCTION__, $method, $uri, "", []);
         exit;
     }
 }
